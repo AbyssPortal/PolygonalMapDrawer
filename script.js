@@ -13,18 +13,38 @@ let offsetX = 0;
 let offsetY = 0;
 
 
+let isPanning = false;
+let panStartX, panStartY;
+
 
 canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - offsetX) / zoomLevel;
-    const y = (e.clientY - rect.top - offsetY) / zoomLevel;
-    draggingPoint = currentPolygon.points.find(point => Math.hypot(point.x - x, point.y - y) < SNAP_DISTANCE / zoomLevel);
-    if (draggingPoint) {
-        isDragging = true;
-    } else {
-        const snappedPoint = getSnappedPoint(x, y);
-        currentPolygon.points.push(snappedPoint);
-        draw();
+    if (e.button == 0) { //left
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left - offsetX) / zoomLevel;
+        const y = (e.clientY - rect.top - offsetY) / zoomLevel;
+        draggingPoint = currentPolygon.points.find(point => Math.hypot(point.x - x, point.y - y) < SNAP_DISTANCE / zoomLevel);
+        if (draggingPoint) {
+            isDragging = true;
+        } else {
+            const snappedPoint = getSnappedPoint(x, y);
+            currentPolygon.points.push(snappedPoint);
+            draw();
+        }
+    } else if (e.button == 2) { // right 
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left - offsetX) / zoomLevel;
+        const y = (e.clientY - rect.top - offsetY) / zoomLevel;
+        const pointIndex = currentPolygon.points.findIndex(point => Math.hypot(point.x - x, point.y - y) < SNAP_DISTANCE / zoomLevel);
+        if (pointIndex !== -1) {
+            currentPolygon.points.splice(pointIndex, 1);
+            draw();
+        }
+    } else if (e.button == 1) { //middle
+        isPanning = true;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+        e.preventDefault(); // Prevent default middle mouse button behavior
     }
 });
 
@@ -34,19 +54,22 @@ canvas.addEventListener('mousemove', (e) => {
         draggingPoint.x = (e.clientX - rect.left - offsetX) / zoomLevel;
         draggingPoint.y = (e.clientY - rect.top - offsetY) / zoomLevel;
         draw();
+    } else if (isPanning) {
+        console.log(panStartX)
+        const dx = (e.clientX - panStartX) ;
+        const dy = (e.clientY - panStartY) ;
+        offsetX += dx;
+        offsetY += dy;
+        console.log(offsetX)
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+        draw();
     }
 });
 
 canvas.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-const x = (e.clientX - rect.left - offsetX) / zoomLevel;
-const y = (e.clientY - rect.top - offsetY) / zoomLevel;
-    const pointIndex = currentPolygon.points.findIndex(point => Math.hypot(point.x - x, point.y - y) < SNAP_DISTANCE / zoomLevel);
-    if (pointIndex !== -1) {
-        currentPolygon.points.splice(pointIndex, 1);
-        draw();
-    }
+
 });
 
 canvas.addEventListener('wheel', (e) => {
@@ -61,9 +84,19 @@ canvas.addEventListener('wheel', (e) => {
     }
 });
 
-canvas.addEventListener('mouseup', () => {
+canvas.addEventListener('mouseup', (e) => {
+    if (e.button == 0) { // left
     isDragging = false;
     draggingPoint = null;
+    } else if (e.button == 1) { // middle
+        isPanning = false;
+        canvas.style.cursor = 'default';
+    }
+});
+
+canvas.addEventListener('mouseleave', () => {
+    isPanning = false;
+    canvas.style.cursor = 'default';
 });
 
 
@@ -82,8 +115,8 @@ function loadImage(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            img.onload = function() {
+        reader.onload = function (e) {
+            img.onload = function () {
                 draw();
             };
             img.src = e.target.result;
@@ -96,7 +129,7 @@ function loadGraph(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             let graphData;
             try {
                 graphData = JSON.parse(e.target.result);
@@ -245,7 +278,7 @@ canvas.addEventListener('mousemove', (e) => {
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Delete') {
-        const polygonIndex = polygons.findIndex(polygon => 
+        const polygonIndex = polygons.findIndex(polygon =>
             polygon.points.some(point => Math.hypot(mouseX - point.x, mouseY - point.y) < SNAP_DISTANCE)
         );
         if (polygonIndex !== -1) {
