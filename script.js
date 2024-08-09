@@ -41,8 +41,8 @@ canvas.addEventListener('mousedown', (e) => {
         }
     } else if (e.button == 1) { //middle
         isPanning = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
         canvas.style.cursor = 'grabbing';
         e.preventDefault(); // Prevent default middle mouse button behavior
     }
@@ -56,11 +56,11 @@ canvas.addEventListener('mousemove', (e) => {
         draw();
     } else if (isPanning) {
         const dx = (e.clientX - panStartX) ;
-        const dy = (e.clientY - startY) ;
+        const dy = (e.clientY - panStartY) ;
         offsetX += dx;
         offsetY += dy;
-        startX = e.clientX;
-        startY = e.clientY;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
         draw();
     }
 });
