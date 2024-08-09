@@ -110,11 +110,13 @@ function drawPolygon(polygon) {
 }
 
 function outputCoordinates() {
+    const width = document.getElementById('canvasWidth').value;
+    const height = document.getElementById('canvasHeight').value;
     const output = polygons.map(polygon => ({
         color: polygon.color,
         points: polygon.points.map(point => ({
-            x: (point.x * zoomLevel + offsetX) / 800,
-            y: (point.y * zoomLevel + offsetY) / 600
+            x: (point.x * zoomLevel + offsetX) / width,
+            y: (point.y * zoomLevel + offsetY) / height
         }))
     }));
     console.log(output);
@@ -202,3 +204,36 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+function changeCanvasResolution() {
+    const canvas = document.getElementById('polygonCanvas');
+    const width = document.getElementById('canvasWidth').value;
+    const height = document.getElementById('canvasHeight').value;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    draw()
+}
+
+
+function loadGraphFromJson() {
+    const jsonInput = document.getElementById('jsonInput').value;
+    try {
+        const graphData = JSON.parse(jsonInput);
+        loadPolygons(graphData);
+    } catch (error) {
+        console.error("Invalid JSON string");
+    }
+}
+
+function loadPolygons(graphData) {
+    polygons = graphData.map(polygonData => ({
+        color: polygonData.color,
+        points: polygonData.points.map(point => ({
+            x: point.x * canvas.width,
+            y: point.y * canvas.height
+        }))
+    }));
+    draw();
+}

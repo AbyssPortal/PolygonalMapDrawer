@@ -17,7 +17,19 @@
     <button onclick="finalizePolygon()">Finalize Polygon</button>
     <button onclick="outputCoordinates()">Output Coordinates</button>
     <button onclick="resetZoom()">Reset Zoom</button>
+    <div>
+        <label for="canvasWidth">Width:</label>
+        <input type="number" id="canvasWidth" value="800">
+        <label for="canvasHeight">Height:</label>
+        <input type="number" id="canvasHeight" value="600">
+        <button onclick="changeCanvasResolution()">Change Resolution</button>
+    </div>
     <div id="output"></div>
+    <div>
+        <label for="jsonInput">Paste JSON:</label>
+        <textarea id="jsonInput" rows="10" cols="50"></textarea>
+        <button onclick="loadGraphFromJson()">Load Graph</button>
+    </div>
     <script src="script.js"></script>
 </body>
 
