@@ -24,15 +24,13 @@
         <input type="number" id="canvasHeight" value="600">
         <button onclick="changeCanvasResolution()">Change Resolution</button>
     </div>
-    <div id="output"></div>
     <div>
         <label for="imageInput">Upload Image:</label>
         <input type="file" id="imageInput" accept="image/*" onchange="loadImage(event)">
     </div>
     <div>
-        <label for="jsonInput">Paste JSON:</label>
-        <textarea id="jsonInput" rows="10" cols="50"></textarea>
-        <button onclick="loadGraphFromJson()">Load Graph</button>
+        <label for="graphInput"> Upload Graph:</label>
+        <input type="file" id="graphInput" accept=".json" onchange="loadGraph(event)">
     </div>
     <script src="script.js"></script>
 </body>

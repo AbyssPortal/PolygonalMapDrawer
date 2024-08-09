@@ -92,6 +92,24 @@ function loadImage(event) {
     }
 }
 
+function loadGraph(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let graphData;
+            try {
+                graphData = JSON.parse(e.target.result);
+            } catch (error) {
+                console.error('Invalid JSON data:', error);
+                return;
+            }
+            loadPolygons(graphData);
+        };
+        reader.readAsText(file);
+    }
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, offsetX, offsetY, canvas.width * zoomLevel, canvas.height * zoomLevel);
@@ -130,15 +148,29 @@ function drawPolygon(polygon) {
 function outputCoordinates() {
     const width = document.getElementById('canvasWidth').value;
     const height = document.getElementById('canvasHeight').value;
+
+    if (currentPolygon.points.length > 0) {
+        if (confirm("Saving without finalizing will not save the current polygon. would you like to finalize it?")) {
+            finalizePolygon();
+        }
+    }
+
     const output = polygons.map(polygon => ({
         color: polygon.color,
         points: polygon.points.map(point => ({
-            x: (point.x * zoomLevel + offsetX) / width,
-            y: (point.y * zoomLevel + offsetY) / height
+            x: (point.x) / width,
+            y: (point.y) / height
         }))
     }));
     console.log(output);
-    document.getElementById('output').textContent = JSON.stringify(output, null, 2);
+
+    const outputData = JSON.stringify(output);
+    const blob = new Blob([outputData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'graph.json';
+    link.click();
 }
 
 function getLuminance(color) {
@@ -235,15 +267,6 @@ function changeCanvasResolution() {
 }
 
 
-function loadGraphFromJson() {
-    const jsonInput = document.getElementById('jsonInput').value;
-    try {
-        const graphData = JSON.parse(jsonInput);
-        loadPolygons(graphData);
-    } catch (error) {
-        console.error("Invalid JSON string");
-    }
-}
 
 function loadPolygons(graphData) {
     polygons = graphData.map(polygonData => ({
