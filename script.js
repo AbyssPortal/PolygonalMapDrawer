@@ -75,8 +75,26 @@ function finalizePolygon() {
     }
 }
 
+
+let img = new Image();
+
+function loadImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.onload = function() {
+                draw();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, offsetX, offsetY, canvas.width * zoomLevel, canvas.height * zoomLevel);
     ctx.save();
     ctx.translate(offsetX, offsetY)
     ctx.scale(zoomLevel, zoomLevel);
