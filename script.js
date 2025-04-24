@@ -55,8 +55,8 @@ canvas.addEventListener('mousemove', (e) => {
         draggingPoint.y = (e.clientY - rect.top - offsetY) / zoomLevel;
         draw();
     } else if (isPanning) {
-        const dx = (e.clientX - panStartX) ;
-        const dy = (e.clientY - panStartY) ;
+        const dx = (e.clientX - panStartX);
+        const dy = (e.clientY - panStartY);
         offsetX += dx;
         offsetY += dy;
         panStartX = e.clientX;
@@ -84,8 +84,8 @@ canvas.addEventListener('wheel', (e) => {
 
 canvas.addEventListener('mouseup', (e) => {
     if (e.button == 0) { // left
-    isDragging = false;
-    draggingPoint = null;
+        isDragging = false;
+        draggingPoint = null;
     } else if (e.button == 1) { // middle
         isPanning = false;
         canvas.style.cursor = 'default';
@@ -283,6 +283,30 @@ document.addEventListener('keydown', (e) => {
             polygons.splice(polygonIndex, 1);
             draw();
         }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Home') {
+        e.preventDefault();
+
+        const polygonIndex = polygons.findIndex(polygon =>
+            polygon.points.some(point => Math.hypot(mouseX - point.x, mouseY - point.y) < SNAP_DISTANCE)
+        );
+        if (polygonIndex !== -1) {
+            finalizePolygon();
+            currentPolygon = polygons[polygonIndex];
+            polygons.splice(polygonIndex, 1);
+        }
+        const cycleTo = currentPolygon.points.findIndex(point => Math.hypot(mouseX - point.x, mouseY - point.y) < SNAP_DISTANCE) + 1;
+        console.log(cycleTo);
+        if (cycleTo !== -1) {
+            const firstPart = currentPolygon.points.slice(0, cycleTo);
+            const secondPart = currentPolygon.points.slice(cycleTo);
+            currentPolygon.points = [...secondPart, ...firstPart];
+        }
+        draw();
+
     }
 });
 
