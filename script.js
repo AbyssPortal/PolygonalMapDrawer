@@ -286,6 +286,29 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+document.addEventListener('keydown', (e) => {
+    e.preventDefault();
+    if (e.key === 'Home') {
+        const polygonIndex = polygons.findIndex(polygon =>
+            polygon.points.some(point => Math.hypot(mouseX - point.x, mouseY - point.y) < SNAP_DISTANCE)
+        );
+        if (polygonIndex !== -1) {
+            finalizePolygon();
+            currentPolygon = polygons[polygonIndex];
+            polygons.splice(polygonIndex, 1);
+        }
+        const cycleTo = currentPolygon.points.findIndex(point => Math.hypot(mouseX - point.x, mouseY - point.y) < SNAP_DISTANCE) + 1;
+        console.log(cycleTo);
+        if (cycleTo !== -1) {
+            const firstPart = currentPolygon.points.slice(0, cycleTo);
+            const secondPart = currentPolygon.points.slice(cycleTo);
+            currentPolygon.points = [...secondPart, ...firstPart];
+        }
+        draw();
+
+    }
+});
+
 function changeCanvasResolution() {
     const canvas = document.getElementById('polygonCanvas');
     const width = document.getElementById('canvasWidth').value;
